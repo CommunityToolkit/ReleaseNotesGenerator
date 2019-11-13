@@ -13,7 +13,13 @@ namespace ReleaseNotes
     {
         static GitHubClient _client = new GitHubClient(new ProductHeaderValue("uct-release-notes"));
         static Dictionary<string, User> _cachedUsers = new Dictionary<string, User>();
-        static string[] _labels = { "animations", "controls", "extensions", "services", "helpers", "connectivity", "notifications", "documentation", "sample app" };
+        // TODO: Move to external config file
+        static string[] _labels = { "animations :izakaya_lantern:", "controls :control_knobs:", "extensions :zap:", "services :construction_worker_man:", "helpers :raised_hand:", "connectivity :signal_strength:", "notifications :bell:", "documentation :page_with_curl:", "sample app" };
+
+        static string _breakingTag = "introduce breaking changes :boom:";
+
+        static string _breakingHeader = "Breaking Changes";
+        static string _otherHeader = "Other Fixes";
 
         const string _clientId = "[CLIENT-ID]";
         const string _clientSecret = "[CLIENT-SECRET]";
@@ -71,8 +77,8 @@ namespace ReleaseNotes
             {
                 notes.Add(labelName, new List<string>());
             }
-            notes.Add("other", new List<string>());
-            notes.Add("breaking changes", new List<string>());
+            notes.Add(_otherHeader, new List<string>());
+            notes.Add(_breakingHeader, new List<string>());
 
             try
             {
@@ -105,14 +111,14 @@ namespace ReleaseNotes
                         var issue = await _client.Issue.Get(repoOwner, repoName, pr.Number);
                         var matchedLabel = issue.Labels.Where(i => _labels.Contains(i.Name)).FirstOrDefault();
 
-                        notes[matchedLabel != null ? matchedLabel.Name : "other"].Add(line);
+                        notes[matchedLabel != null ? matchedLabel.Name : _otherHeader].Add(line);
 
-                        if (issue.Labels.Where(i => i.Name == "introduce breaking changes").Count() > 0)
-                            notes["breaking changes"].Add(line);
+                        if (issue.Labels.Where(i => i.Name == _breakingTag).Count() > 0)
+                            notes[_breakingHeader].Add(line);
                     }
 
                     options.StartPage++;
-                    prs = await _client.PullRequest.GetAllForRepository("Microsoft", "UWPCommunityToolkit", request, options);
+                    prs = await _client.PullRequest.GetAllForRepository(repoOwner, repoName, request, options);
                     actionablePRs = prs.Where(pr => pr.Merged && pr.MergedAt > release.PublishedAt);
                 } while (actionablePRs.Count() > 0);
             }
