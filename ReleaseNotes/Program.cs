@@ -13,21 +13,55 @@ namespace ReleaseNotes
     {
         static GitHubClient _client = new GitHubClient(new ProductHeaderValue("uct-release-notes"));
         static Dictionary<string, User> _cachedUsers = new Dictionary<string, User>();
-        // TODO: Move to external config file
-        static string[] _labels = { "animations :izakaya_lantern:", "controls :control_knobs:", "extensions :zap:", "services :construction_worker_man:", "helpers :raised_hand:", "connectivity :signal_strength:", "notifications :bell:", "documentation :page_with_curl:", "sample app" };
 
-        static string _breakingTag = "introduce breaking changes :boom:";
+        // Contents of Tags.txt (prioritized order)
+        static string[] _labels;
 
+        // Contents of Config.txt
         static string _breakingHeader = "Breaking Changes";
+        static string _breakingTag = "introduce breaking changes :boom:";
         static string _otherHeader = "Other Fixes";
 
+        // GitHub App Info
         const string _clientId = "[CLIENT-ID]";
         const string _clientSecret = "[CLIENT-SECRET]";
 
-        static string _filename = "token";
+        static string _tokenFilename = "token";
+        static string _tagsFilename = "Tags.txt";
+        static string _configFilename = "Config.txt";
 
         static int Main(string[] args)
         {
+            if (File.Exists(_tagsFilename))
+            {
+                _labels = File.ReadAllLines(_tagsFilename);
+            }
+            else
+            {
+                Console.WriteLine("\r\nMissing Tags.txt file. Add GitHub labels to file one per line.");
+                return 1;
+            }
+
+            if (File.Exists(_configFilename))
+            {
+                var lines = File.ReadAllLines(_configFilename);
+                if (lines.Count() < 3)
+                {
+                    Console.WriteLine("Missing config lines. File Ignored.");
+                }
+                else
+                {
+                    _breakingHeader = lines[0];
+                    _breakingTag = lines[1];
+                    _otherHeader = lines[2];
+                }
+            }
+            else
+            {
+                Console.WriteLine("\r\nMissing Config.txt file. Add Breaking Header, breaking label, and Other fixes label on 3 lines.");
+                return 1;
+            }
+
             if (args.Length == 1 && args[0] == "-auth")
             {
                 Authorize().GetAwaiter().GetResult();
@@ -35,13 +69,13 @@ namespace ReleaseNotes
             }
             if (args.Length < 2)
             {
-                System.Console.WriteLine("\r\nUsage: releasenotes <Repo Owner> <Repo Name> [-o outputfile]\r\n");
+                Console.WriteLine("\r\nUsage: releasenotes <Repo Owner> <Repo Name> [-o outputfile]\r\n");
                 return 1;
             }
 
-            if (File.Exists(_filename))
+            if (File.Exists(_tokenFilename))
             {
-                var token = File.ReadAllText(_filename);
+                var token = File.ReadAllText(_tokenFilename);
                 _client.Credentials = new Credentials(token);
             }
 
@@ -74,7 +108,7 @@ namespace ReleaseNotes
             var request = new OauthTokenRequest(_clientId, _clientSecret, code);
             var token = await _client.Oauth.CreateAccessToken(request);
 
-            File.WriteAllText(_filename, token.AccessToken);
+            File.WriteAllText(_tokenFilename, token.AccessToken);
         }
 
         private static async Task<string> PrintReleaseNotes(string repoOwner, string repoName)
