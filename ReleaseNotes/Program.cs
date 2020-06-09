@@ -35,7 +35,7 @@ namespace ReleaseNotes
             }
             if (args.Length < 2)
             {
-                System.Console.WriteLine("\r\nUsage: releasenotes <Repo Owner> <Repo Name>\r\n");
+                System.Console.WriteLine("\r\nUsage: releasenotes <Repo Owner> <Repo Name> [-o outputfile]\r\n");
                 return 1;
             }
 
@@ -46,7 +46,16 @@ namespace ReleaseNotes
             }
 
             var task = PrintReleaseNotes(args[0], args[1]);
-            Console.Write(task.GetAwaiter().GetResult());
+            var contents = task.GetAwaiter().GetResult();
+
+            if (args.Length < 4)
+            {
+                Console.Write(contents);
+            }
+            else if (args[2] == "-o")
+            {
+                File.WriteAllText(args[3], contents);
+            }
 
             return 0;
         }
