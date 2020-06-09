@@ -1,12 +1,12 @@
-﻿sample app :iphone:
-animations :izakaya_lantern:
+﻿animations :izakaya_lantern:
 controls :control_knobs:
+feature :bulb:
 extensions :zap:
 services :construction_worker_man:
 helpers :raised_hand:
 connectivity :signal_strength:
 notifications :bell:
-feature :bulb:
+sample app :iphone:
 improvements :sparkles:
 documentation :page_with_curl:
 maintenance :gear:

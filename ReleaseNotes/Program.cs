@@ -152,9 +152,9 @@ namespace ReleaseNotes
                         var line = $"\t- {pr.Title} - [{user.Name ?? user.Login}]({user.HtmlUrl}) ([PR]({pr.HtmlUrl}))";
 
                         var issue = await _client.Issue.Get(repoOwner, repoName, pr.Number);
-                        var matchedLabel = issue.Labels.Where(i => _labels.Contains(i.Name)).FirstOrDefault();
+                        var matchedLabel = _labels.FirstOrDefault(label => issue.Labels.Select(i => i.Name).Contains(label));
 
-                        notes[matchedLabel != null ? matchedLabel.Name : _otherHeader].Add(line);
+                        notes[matchedLabel != null ? matchedLabel : _otherHeader].Add(line);
 
                         if (issue.Labels.Where(i => i.Name == _breakingTag).Count() > 0)
                             notes[_breakingHeader].Add(line);
