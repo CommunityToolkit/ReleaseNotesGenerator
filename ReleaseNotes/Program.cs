@@ -149,7 +149,7 @@ namespace ReleaseNotes
                             _cachedUsers.Add(pr.User.Login, user);
                         }
 
-                        var line = $"\t- {pr.Title} - [{user.Name ?? user.Login}]({user.HtmlUrl}) ([PR]({pr.HtmlUrl}))";
+                        var line = $"\t- {pr.Title} - by [{user.Name ?? user.Login}]({user.HtmlUrl}) [PR #{pr.Number}]({pr.HtmlUrl}))";
 
                         var issue = await _client.Issue.Get(repoOwner, repoName, pr.Number);
                         var matchedLabel = _labels.FirstOrDefault(label => issue.Labels.Select(i => i.Name).Contains(label));
